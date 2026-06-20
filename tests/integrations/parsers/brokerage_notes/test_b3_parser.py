@@ -22,6 +22,7 @@ def test_b3_parser_WHEN_called_with_single_page_note_THEN_correctly_parses_broke
             BrokerageNote(
                 reference_id=4535159,
                 reference_date=date(2022, 5, 2),
+                broker_cnpj="02.332.886/0011-78",
                 settlement_fee=Decimal("7.92"),
                 registration_fee=Decimal("0"),
                 term_fee=Decimal("0"),

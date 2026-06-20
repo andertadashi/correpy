@@ -148,4 +148,8 @@ class BaseBrokerageNoteParser(ABC):
     def parse_brokerage_note(self) -> List[BrokerageNote]:
         self.set_brokerage_note_transactions()
         self.set_brokerage_note_fees()
-        return list(self.brokerage_notes.values())
+        broker_cnpj = self.fitz_parser.extract_broker_cnpj()
+        notes = list(self.brokerage_notes.values())
+        for note in notes:
+            note.broker_cnpj = broker_cnpj
+        return notes

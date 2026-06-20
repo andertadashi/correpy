@@ -138,3 +138,23 @@ class TestConnectBankAccount:
 
         with pytest.raises(ProblemParsingBrokerageNoteException):
             FitzParser.search_and_extract_rectangle_from_text(page=self.text_page_mock, text="test")
+
+    def test_extract_broker_cnpj_when_labeled_cnpj_in_header_then_returns_it(self):
+        self.page_mock.get_text.return_value = (
+            "Rico Investimentos - Grupo XP\nC.N.P.J: 02.332.886/0016-82\nOuvidoria"
+        )
+        fitz_parser = FitzParser(file=self.brokerage_note, password="123")
+
+        assert fitz_parser.extract_broker_cnpj() == "02.332.886/0016-82"
+
+    def test_extract_broker_cnpj_when_only_unlabeled_cnpj_then_falls_back_to_first(self):
+        self.page_mock.get_text.return_value = "Some broker 11.222.333/0001-44 header"
+        fitz_parser = FitzParser(file=self.brokerage_note, password="123")
+
+        assert fitz_parser.extract_broker_cnpj() == "11.222.333/0001-44"
+
+    def test_extract_broker_cnpj_when_no_cnpj_then_returns_empty_string(self):
+        self.page_mock.get_text.return_value = "No document number here"
+        fitz_parser = FitzParser(file=self.brokerage_note, password="123")
+
+        assert fitz_parser.extract_broker_cnpj() == ""

@@ -1,4 +1,5 @@
 import io
+import re
 import typing
 from typing import List, Optional, Union
 
@@ -66,3 +67,22 @@ class FitzParser:
             if page_document.get_textpage().search(text):
                 return True
         return False
+
+    def extract_broker_cnpj(self) -> str:
+        """Broker CNPJ from the note header (e.g. 'C.N.P.J: 02.332.886/0016-82').
+
+        Prefers a CNPJ labeled with 'C.N.P.J'; falls back to the first CNPJ found.
+        Returns '' when none is present.
+        """
+        if self.document is None:
+            return ""
+        cnpj = r"\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}"
+        for page in self.document:
+            text = page.get_text()
+            labeled = re.search(rf"C\.?\s*N\.?\s*P\.?\s*J[.:\s]*?({cnpj})", text, re.IGNORECASE)
+            if labeled:
+                return labeled.group(1)
+            plain = re.search(cnpj, text)
+            if plain:
+                return plain.group(0)
+        return ""
