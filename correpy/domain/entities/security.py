@@ -19,8 +19,12 @@ BDR_TICKER_PATTERN = "([A-Z-0-9]{4})(31|32|33|34|35|36|39)"
 class Security:
     name: str
     ticker: Optional[str] = None
+    raw_name: Optional[str] = None
 
     def __post_init__(self) -> None:
+        if self.raw_name is None:
+            # Preserve the pristine name exactly as it came, before any cleanup.
+            self.raw_name = self.name
         self.__cleanup_name()
         self.ticker = self.extract_ticker_from_name()
 

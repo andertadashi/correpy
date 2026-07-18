@@ -31,10 +31,12 @@ class B3Parser(BaseBrokerageNoteParser):
     first_column_transactions = "Q"
     transaction_columns_index = {
         "transaction_type": 1,
+        "market_type": 2,
         "start_short_name": 3,
         "end_short_name": -4,
         "unit_value": -3,
         "amount": -4,
+        "debit_credit": -1,
     }
     financial_summary_header_mapper = {
         "Taxa de liquidação": BrokerageNoteFeeType.SETTLEMENT_FEE,

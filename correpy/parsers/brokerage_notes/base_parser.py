@@ -104,18 +104,33 @@ class BaseBrokerageNoteParser(ABC):
         amount_string = line_array[self.transaction_columns_index["amount"]]
         return extract_amount_from_line(line=amount_string)
 
+    def __parse_optional_column(self, *, line_array: List[str], key: str) -> str:
+        # Columns not every broker layout provides (market type, debit/credit).
+        # Absent key or out-of-range index → "" (never raise).
+        index = self.transaction_columns_index.get(key)
+        if index is None:
+            return ""
+        try:
+            return line_array[index]
+        except IndexError:
+            return ""
+
     def _create_transaction(self, *, line: str) -> Transaction:
         line_array = line.split(" ")
         transaction_type = self.__parse_transaction_type(line_array=line_array)
         security_name = self.__parse_security_name(line_array=line_array)
         unit_price = self.__parse_transaction_unit_price(line_array=line_array)
         amount = self.__parse_transaction_amount(line_array=line_array)
+        market_type = self.__parse_optional_column(line_array=line_array, key="market_type")
+        debit_credit = self.__parse_optional_column(line_array=line_array, key="debit_credit")
 
         return Transaction(
             transaction_type=transaction_type,
             amount=amount,
             unit_price=unit_price,
             security=Security(name=security_name),
+            market_type=market_type,
+            debit_credit=debit_credit,
         )
 
     def _build_brokerage_note_section_from_two_rectangles(

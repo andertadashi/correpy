@@ -13,6 +13,8 @@ class Transaction:
     amount: Decimal
     unit_price: Decimal
     security: Security
+    market_type: str = ""
+    debit_credit: str = ""
     source_withheld_taxes: Decimal = field(init=False, default=Decimal(0))
 
     def __post_init__(self) -> None:
