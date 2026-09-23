@@ -5,6 +5,10 @@ from correpy.domain.enums import BrokerageNoteFeeType
 from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from correpy.parsers.brokerage_notes.brokerage_note_section import BrokerageNoteSection
 
+# Named logger at DEBUG: the transaction line is raw brokerage-note content
+# and must not reach an INFO-level root handler in the host application.
+logger = logging.getLogger(__name__)
+
 
 class NuInvestParser(B3Parser):
     REFERENCE_NOTE_ID = "Número da nota"
@@ -41,7 +45,7 @@ class NuInvestParser(B3Parser):
                 can_include_transactions = False
 
             if can_include_transactions:
-                logging.info("Parsed transaction line: %s", transaction_full_line)
+                logger.debug("Parsed transaction line: %s", transaction_full_line)
                 transaction_lines_text.append(transaction_full_line)
 
             if self._is_transactions_header_line(line_text=transaction_full_line):

@@ -13,6 +13,10 @@ from correpy.parsers.brokerage_notes.brokerage_note_section import BrokerageNote
 from correpy.parsers.exceptions import ProblemParsingBrokerageNoteException
 from correpy.utils import extract_date_from_line, extract_value_from_line, extract_id_from_line
 
+# Named logger at DEBUG: the transaction line is raw brokerage-note content
+# and must not reach an INFO-level root handler in the host application.
+logger = logging.getLogger(__name__)
+
 
 class B3Parser(BaseBrokerageNoteParser):
     BROKERAGE_NOTE_X_AXIS_START_COORDINATE = 0
@@ -86,7 +90,7 @@ class B3Parser(BaseBrokerageNoteParser):
                 can_include_transactions = False
 
             if can_include_transactions:
-                logging.info("Parsed transaction line: %s", transaction_full_line)
+                logger.debug("Parsed transaction line: %s", transaction_full_line)
                 transaction_lines_text.append(transaction_full_line)
 
             if self._is_transactions_header_line(line_text=transaction_full_line):
