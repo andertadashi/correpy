@@ -115,10 +115,27 @@ class BaseBrokerageNoteParser(ABC):
         except IndexError:
             return ""
 
-    def _create_transaction(self, *, line: str) -> Transaction:
+    def _has_transaction_type_column(self, *, line_array: List[str]) -> bool:
+        # Some notes wrap the "Especificação do título" column onto its OWN
+        # line (observed on FRACIONARIO rows of a real note), leaving a
+        # fragment with no C/V column at all. Detect that BEFORE indexing,
+        # so the caller can merge it into the next line instead of raising.
+        index = self.transaction_columns_index["transaction_type"]
+        try:
+            value = line_array[index]
+        except IndexError:
+            return False
+        return value in (
+            self.buy_transaction_indicator_on_brokerage_note,
+            self.sell_transaction_indicator_on_brokerage_note,
+        )
+
+    def _create_transaction(self, *, line: str, security_name: Optional[str] = None) -> Transaction:
         line_array = line.split(" ")
         transaction_type = self.__parse_transaction_type(line_array=line_array)
-        security_name = self.__parse_security_name(line_array=line_array)
+        resolved_security_name = (
+            self.__parse_security_name(line_array=line_array) if security_name is None else security_name
+        )
         unit_price = self.__parse_transaction_unit_price(line_array=line_array)
         amount = self.__parse_transaction_amount(line_array=line_array)
         market_type = self.__parse_optional_column(line_array=line_array, key="market_type")
@@ -128,7 +145,7 @@ class BaseBrokerageNoteParser(ABC):
             transaction_type=transaction_type,
             amount=amount,
             unit_price=unit_price,
-            security=Security(name=security_name),
+            security=Security(name=resolved_security_name),
             market_type=market_type,
             debit_credit=debit_credit,
         )

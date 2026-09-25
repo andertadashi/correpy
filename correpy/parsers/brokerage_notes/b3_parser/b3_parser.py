@@ -1,12 +1,13 @@
 import logging
 from datetime import date
 from re import sub
-from typing import List
+from typing import List, Optional
 
 import fitz
 from fitz import TextPage
 
 from correpy.domain.entities.brokerage_note import BrokerageNote
+from correpy.domain.entities.transaction import Transaction
 from correpy.domain.enums import BrokerageNoteFeeType
 from correpy.parsers.brokerage_notes.base_parser import BaseBrokerageNoteParser
 from correpy.parsers.brokerage_notes.brokerage_note_section import BrokerageNoteSection
@@ -98,6 +99,32 @@ class B3Parser(BaseBrokerageNoteParser):
 
         return transaction_lines_text
 
+    def _build_transactions_from_lines(self, *, lines: List[str]) -> List[Transaction]:
+        """Turn already-extracted transaction line texts into `Transaction`s.
+
+        Most notes print one full transaction per physical line. Some
+        (observed on a real note, FRACIONARIO/odd-lot rows) instead wrap the
+        "Especificação do título" text onto its OWN line — the column
+        renders at a slightly different baseline than the rest of the row,
+        so `_group_words_by_line` splits it off. That fragment has no C/V
+        column: hold it and use it as the security name for the NEXT line,
+        instead of indexing into it directly (which raises `IndexError`).
+        """
+        transactions: List[Transaction] = []
+        pending_security_name: Optional[str] = None
+        for raw_line in lines:
+            line = sub(pattern=r"^N\s", repl="", string=raw_line)
+            line_array = line.split(" ")
+            if not self._has_transaction_type_column(line_array=line_array):
+                pending_security_name = (
+                    line if pending_security_name is None else f"{pending_security_name} {line}"
+                )
+                continue
+            transaction_item = self._create_transaction(line=line, security_name=pending_security_name)
+            pending_security_name = None
+            transactions.append(transaction_item)
+        return transactions
+
     def _get_or_create_brokerage_note_by_page(self, page: TextPage, page_number: int) -> BrokerageNote:
         reference_id_rect = self.fitz_parser.search_and_extract_rectangle_from_text(
             page=page, text=self.REFERENCE_NOTE_ID
@@ -160,9 +187,7 @@ class B3Parser(BaseBrokerageNoteParser):
                 transactions = self._get_transaction_lines_text_from_words(
                     transactions_brokerage_note_section=transactions_brokerage_note_section
                 )
-                for transaction in transactions:
-                    transaction = sub(pattern=r"^N\s", repl="", string=transaction)
-                    transaction_item = self._create_transaction(line=transaction)
+                for transaction_item in self._build_transactions_from_lines(lines=transactions):
                     brokerage_note.add_transaction(transaction=transaction_item)
 
             except ProblemParsingBrokerageNoteException:
