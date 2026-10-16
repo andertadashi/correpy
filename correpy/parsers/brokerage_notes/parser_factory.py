@@ -11,6 +11,7 @@ from correpy.parsers.brokerage_notes.b3_parser.b3_parser import B3Parser
 from correpy.parsers.brokerage_notes.base_parser import BaseBrokerageNoteParser
 from correpy.parsers.brokerage_notes.nuinvest_parser.nuinvest import NuInvestParser
 from correpy.parsers.brokerage_notes.inter_parser.inter import InterParser
+from correpy.parsers.brokerage_notes.xp_consulta_parser.xp_consulta import XpConsultaParser
 from correpy.parsers.fitz_parser import FitzParser
 
 
@@ -30,6 +31,12 @@ class ParserFactory:
         for cnpj, parser in self.CNPJ_PARSER_MAP.items():
             if fitz_parser.is_text_in_document(text=cnpj):
                 return parser(brokerage_note=self.__brokerage_note, password=self.__password)
+
+        # A consulta de notas do site da XP/Rico: mesmo conteúdo SINACOR, outro layout.
+        if fitz_parser.is_text_in_document(text=XpConsultaParser.CONSULTA_MARKER) and fitz_parser.is_text_in_document(
+            text=XpConsultaParser.REFERENCE_NOTE_ID
+        ):
+            return XpConsultaParser(brokerage_note=self.__brokerage_note, password=self.__password)
 
         return B3Parser(brokerage_note=self.__brokerage_note, password=self.__password)
 
