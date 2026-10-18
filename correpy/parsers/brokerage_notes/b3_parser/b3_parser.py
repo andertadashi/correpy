@@ -49,6 +49,7 @@ class B3Parser(BaseBrokerageNoteParser):
         "Taxa de termo/opções": BrokerageNoteFeeType.TERM_FEE,
         "Taxa A.N.A.": BrokerageNoteFeeType.ANA_FEE,
         "Emolumentos": BrokerageNoteFeeType.EMOLUMENTS,
+        "Taxa de Transf. de Ativos": BrokerageNoteFeeType.ASSET_TRANSFER_FEE,
         "Taxa Operacional": BrokerageNoteFeeType.OPERATIONAL_FEE,
         "Execução": BrokerageNoteFeeType.EXECUTION,
         "Taxa de Custódia": BrokerageNoteFeeType.CUSTODY_FEE,

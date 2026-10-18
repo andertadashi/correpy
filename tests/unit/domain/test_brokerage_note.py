@@ -111,3 +111,13 @@ def test_update_fee_from_fee_type_when_called_with_invalid_fee_type_then_raises_
 
     with pytest.raises(InvalidBrokerageNoteFeeTypeException):
         brokerage_note.update_fee_from_fee_type(fee_type="invalid", fee_value=Decimal(20))
+
+
+def test_update_fee_from_fee_type_when_called_with_asset_transfer_fee_then_updates_asset_transfer_fee_value():
+    current_fee = Decimal(10)
+    brokerage_note = BrokerageNoteFactory(asset_transfer_fee=current_fee)
+    updated_value = Decimal(20)
+
+    brokerage_note.update_fee_from_fee_type(fee_type=BrokerageNoteFeeType.ASSET_TRANSFER_FEE, fee_value=updated_value)
+
+    assert brokerage_note.asset_transfer_fee == current_fee + updated_value

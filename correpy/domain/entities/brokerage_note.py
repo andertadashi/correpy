@@ -24,6 +24,7 @@ class BrokerageNote:  # pylint:disable=too-many-instance-attributes
     taxes: Decimal = Decimal(0)
     irrf: Decimal = Decimal(0)
     others: Decimal = Decimal(0)
+    asset_transfer_fee: Decimal = Decimal(0)
     transactions: List[Transaction] = field(default_factory=list)
 
     def add_transaction(self, transaction: Transaction) -> None:
@@ -52,5 +53,7 @@ class BrokerageNote:  # pylint:disable=too-many-instance-attributes
             self.irrf += fee_value
         elif fee_type == BrokerageNoteFeeType.OTHERS:
             self.others += fee_value
+        elif fee_type == BrokerageNoteFeeType.ASSET_TRANSFER_FEE:
+            self.asset_transfer_fee += fee_value
         else:
             raise InvalidBrokerageNoteFeeTypeException

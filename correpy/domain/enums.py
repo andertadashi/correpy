@@ -27,3 +27,4 @@ class BrokerageNoteFeeType(Enum):
     IRRF = "IRRF"
     TAXES = "TAXES"
     OTHERS = "OTHERS"
+    ASSET_TRANSFER_FEE = "ASSET_TRANSFER_FEE"

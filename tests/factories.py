@@ -39,6 +39,7 @@ class BrokerageNoteFactory(factory.Factory):
     custody_fee = factory.Faker("pydecimal", right_digits=2, max_value=1000, min_value=1, positive=True)
     taxes = factory.Faker("pydecimal", right_digits=2, max_value=1000, min_value=1, positive=True)
     others = factory.Faker("pydecimal", right_digits=2, max_value=1000, min_value=1, positive=True)
+    asset_transfer_fee = factory.Faker("pydecimal", right_digits=2, max_value=1000, min_value=1, positive=True)
     transactions = factory.List([factory.SubFactory(TransactionFactory) for _ in range(1)])
 
     class Meta:
